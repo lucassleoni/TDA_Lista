@@ -59,16 +59,16 @@ bool lista_vacia(lista_t* lista){
 // Pre C.: Recibe un puntero a un nodo y la posición buscada.
 // Post C.: Devuelve '0' si pudo hallar el nodo en la posicón buscada o '-1' si la lista está vacía o si la posición es inválida.
 //			En caso de éxtio, el nodo recibido apuntará al nodo de la posición buscada.
-int buscar_nodo(lista_t* lista, nodo_t* nodo_buscado, size_t posicion){
+int buscar_nodo(lista_t* lista, nodo_t** nodo_buscado, size_t posicion){
 	if((lista_vacia(lista)) || (posicion >= lista->cantidad)){
 		return ERROR;
 	}
 
 	size_t contador_posicion_buscada = 0;
-	nodo_buscado = lista->nodo_inicio;
+	(*nodo_buscado) = lista->nodo_inicio;
 
 	while(contador_posicion_buscada < posicion){
-		nodo_buscado = nodo_buscado->siguiente;
+		(*nodo_buscado) = (*nodo_buscado)->siguiente;
 		contador_posicion_buscada++;
 	}
 
@@ -132,7 +132,7 @@ int lista_insertar_en_posicion(lista_t* lista, void* elemento, size_t posicion){
 	}
 	else{
 		nodo_t* nodo_aux = NULL;
-		buscar_nodo(lista, nodo_aux, posicion-1);
+		buscar_nodo(lista, &nodo_aux, posicion-1);
 		nodo->siguiente = nodo_aux->siguiente;
 		nodo_aux->siguiente = nodo;
 	}
@@ -153,10 +153,11 @@ int lista_borrar(lista_t* lista){
 	}
 
 	nodo_t* nodo_aux = NULL;
-	buscar_nodo(lista, nodo_aux, (lista->cantidad)-2);
+	buscar_nodo(lista, &nodo_aux, (lista->cantidad)-2);
 	free(lista->nodo_fin);
 	lista->nodo_fin = nodo_aux;
 	lista->nodo_fin->siguiente = NULL;
+	(lista->cantidad)--;
 
 	return EXITO;
 }
@@ -181,11 +182,12 @@ int lista_borrar_de_posicion(lista_t* lista, size_t posicion){
 	nodo_t* nodo_aux = NULL;
 	nodo_t* nodo_aux_2 = NULL;
 
-	buscar_nodo(lista, nodo_aux, posicion-1);
+	buscar_nodo(lista, &nodo_aux, posicion-1);
 	nodo_aux_2 = nodo_aux->siguiente->siguiente;
 	free(nodo_aux->siguiente);
 	nodo_aux->siguiente = nodo_aux_2;
-
+	(lista->cantidad)--;
+	
 	return EXITO;
 }
 
@@ -201,7 +203,7 @@ void* lista_elemento_en_posicion(lista_t* lista, size_t posicion){
 	}
 
 	nodo_t* nodo = NULL;
-	buscar_nodo(lista, nodo, posicion);
+	buscar_nodo(lista, &nodo, posicion);
 
 	return (nodo->elemento);
 }
