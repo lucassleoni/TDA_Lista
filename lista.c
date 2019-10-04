@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <stddef.h>
 
@@ -13,7 +15,7 @@ typedef struct nodo{
 typedef struct lista{
 	nodo_t* nodo_inicio;
 	nodo_t* nodo_fin;
-	int cantidad;
+	size_t cantidad;
 }lista_t;
 
 typedef struct lista_iterador{
@@ -42,7 +44,9 @@ lista_t* lista_crear(){
 // Pre C.: Se debe recibir un puntero al struct lista_t lista.
 // Post C.: Devuelve 'true' si hay algún error que invalide la lista (es decir si no existe la lista o si la cantidad de elementos es menor a '0').
 bool hay_error_lista(lista_t* lista){
-	return ((lista == NULL) || (lista->cantidad < LISTA_VACIA));
+	return ((lista == NULL) ||
+		   (((lista->nodo_inicio) == NULL) && ((lista->nodo_fin) != NULL)) ||
+		   (((lista->nodo_inicio) != NULL) && ((lista->nodo_fin) == NULL)));
 }
 
 /* 
@@ -56,7 +60,7 @@ bool lista_vacia(lista_t* lista){
 // Post C.: Devuelve '0' si pudo hallar el nodo en la posicón buscada o '-1' si la lista está vacía o si la posición es inválida.
 //			En caso de éxtio, el nodo recibido apuntará al nodo de la posición buscada.
 int buscar_nodo(lista_t* lista, nodo_t* nodo_buscado, size_t posicion){
-	if((lista_vacia(lista)) || (posicion < LISTA_VACIA) || (posicion >= lista->cantidad)){
+	if((lista_vacia(lista)) || (posicion >= lista->cantidad)){
 		return ERROR;
 	}
 
@@ -112,7 +116,7 @@ int lista_insertar_en_posicion(lista_t* lista, void* elemento, size_t posicion){
 		return ERROR;
 	}
 
-	if((posicion >= lista->cantidad) || (posicion < LISTA_VACIA)){
+	if(posicion >= lista->cantidad){
 		lista_insertar(lista, elemento);
 		return EXITO;
 	}
@@ -127,7 +131,7 @@ int lista_insertar_en_posicion(lista_t* lista, void* elemento, size_t posicion){
 		lista->nodo_inicio = nodo;
 	}
 	else{
-		nodo_t* nodo_aux;
+		nodo_t* nodo_aux = NULL;
 		buscar_nodo(lista, nodo_aux, posicion-1);
 		nodo->siguiente = nodo_aux->siguiente;
 		nodo_aux->siguiente = nodo;
@@ -148,7 +152,7 @@ int lista_borrar(lista_t* lista){
 		return ERROR;
 	}
 
-	nodo_t* nodo_aux;
+	nodo_t* nodo_aux = NULL;
 	buscar_nodo(lista, nodo_aux, (lista->cantidad)-2);
 	free(lista->nodo_fin);
 	lista->nodo_fin = nodo_aux;
@@ -165,17 +169,17 @@ int lista_borrar(lista_t* lista){
  * Devuelve 0 si pudo eliminar o -1 si no pudo.
  */
 int lista_borrar_de_posicion(lista_t* lista, size_t posicion){
-	if(lista_vacia(lista_vacia)){
+	if(lista_vacia(lista)){
 		return ERROR;
 	}
 
-	if((posicion >= lista->cantidad) || (posicion < LISTA_VACIA)){
+	if(posicion >= lista->cantidad){
 		lista_borrar(lista);
 		return EXITO;
 	}
 //															DIBUJAR BORRANDO PRIMERO/ANTE ULTIMO/ULTIMO Y CON 1, 2, 3 Y 4 NODOS
-	nodo_t* nodo_aux;
-	nodo_t* nodo_aux_2;
+	nodo_t* nodo_aux = NULL;
+	nodo_t* nodo_aux_2 = NULL;
 
 	buscar_nodo(lista, nodo_aux, posicion-1);
 	nodo_aux_2 = nodo_aux->siguiente->siguiente;
@@ -192,7 +196,11 @@ int lista_borrar_de_posicion(lista_t* lista, size_t posicion){
  * Si no existe dicha posicion devuelve NULL.
  */
 void* lista_elemento_en_posicion(lista_t* lista, size_t posicion){
-	nodo_t* nodo;
+	if((hay_error_lista(lista)) || (posicion >= lista->cantidad)){
+		return NULL;
+	}
+
+	nodo_t* nodo = NULL;
 	buscar_nodo(lista, nodo, posicion);
 
 	return (nodo->elemento);
@@ -206,9 +214,8 @@ void* lista_ultimo(lista_t* lista){
 	if(lista_vacia(lista)){
 		return NULL;
 	}
-	nodo_t* nodo_fin = ultimo_nodo(lista);
 
-	return (nodo_fin->elemento);
+	return (lista->nodo_fin->elemento);
 }
 
 /*
@@ -231,9 +238,9 @@ void lista_destruir(lista_t* lista){
 	free(lista);
 }
 
-// Pre C.: 
-// Post C.: 
-bool hay_error_iterador(lista_iterador_t* iterador){
+// Pre C.: Recibe la estructura del iterador externo.
+// Post C.: Devuelve 'true' si la lista a la que apunta el iterador es nula y 'false' en caso contrario.
+bool lista_iterador_es_nula(lista_iterador_t* iterador){
 	return (iterador->lista == NULL);
 }
 
@@ -259,8 +266,8 @@ lista_iterador_t* lista_iterador_crear(lista_t* lista){
 		return NULL;
 	}
 
+	iterador->corriente = NULL;
 	iterador->lista = lista;
-	iterador->corriente = lista->nodo_inicio;
 
 	return iterador;
 }
@@ -270,10 +277,10 @@ lista_iterador_t* lista_iterador_crear(lista_t* lista){
  * si no hay mas.
  */
 bool lista_iterador_tiene_siguiente(lista_iterador_t* iterador){
-	if(hay_error_iterador(iterador)){
+	if(lista_iterador_es_nula(iterador)){
 		return false;
 	}
-	return (iterador->corriente->siguiente != NULL);
+	return ((iterador->corriente->siguiente) != NULL);
 }
 
 /*
@@ -281,12 +288,18 @@ bool lista_iterador_tiene_siguiente(lista_iterador_t* iterador){
  * En caso de error devuelve NULL.
  */
 void* lista_iterador_siguiente(lista_iterador_t* iterador){
-	if(hay_error_iterador(iterador)){
+	if(lista_iterador_es_nula(iterador)){
 		return NULL;
 	}
 
+	if((iterador->corriente) == NULL){
+		iterador->corriente = iterador->lista->nodo_inicio;
+	}
+	else if(lista_iterador_tiene_siguiente(iterador)){
+		iterador->corriente = iterador->corriente->siguiente;
+	}
+
 	void* elemento = iterador->corriente->elemento;
-	iterador->corriente = iterador->corriente->siguiente;
 
 	return elemento;
 }

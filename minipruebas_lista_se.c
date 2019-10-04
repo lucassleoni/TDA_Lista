@@ -1,5 +1,6 @@
-#include "lista.h"
 #include <stdio.h>
+#include <stdlib.h>
+#include "lista.h"
 
 void mostrar_elemento(void* elemento){
     if(elemento){
@@ -11,7 +12,7 @@ void ejecutar_caso_feliz(){
     lista_t* lista = lista_crear();
   
     char a = 'a', b = 'b', c = 'c', d = 'd', w = 'w';
-  
+    
     lista_insertar(lista, &a);
     lista_insertar(lista, &c);
     lista_insertar_en_posicion(lista, &d, 100);
@@ -21,7 +22,7 @@ void ejecutar_caso_feliz(){
     lista_borrar_de_posicion(lista, 3);
 
     printf("Elementos en la lista: ");
-    for(int i = 0; i < lista_elementos(lista); i++){
+    for(size_t i = 0; i < lista_elementos(lista); i++){
         printf("%c ", *(char*)lista_elemento_en_posicion(lista, i));
     }
 
@@ -43,6 +44,7 @@ void ejecutar_caso_feliz(){
 }
 
 int main(){
+    system("clear");
 
     ejecutar_caso_feliz();
 
