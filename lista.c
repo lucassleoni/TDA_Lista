@@ -42,7 +42,7 @@ lista_t* lista_crear(){
 }
 
 // Pre C.: Se debe recibir un puntero al struct lista_t lista.
-// Post C.: Devuelve 'true' si hay algún error que invalide la lista (es decir si no existe la lista o si la cantidad de elementos es menor a '0').
+// Post C.: Devuelve 'true' si hay algún error que invalide la lista.
 bool hay_error_lista(lista_t* lista){
 	return ((lista == NULL) ||
 		   (((lista->nodo_inicio) == NULL) && ((lista->nodo_fin) != NULL)) ||
@@ -56,8 +56,8 @@ bool lista_vacia(lista_t* lista){
 	return ((hay_error_lista(lista)) || (lista->cantidad == LISTA_VACIA));
 }
 
-// Pre C.: Recibe un puntero a un nodo y la posición buscada.
-// Post C.: Devuelve un puntero al nodo en la posicón buscada o NULL en caso de error
+// Pre C.: Recibe un puntero a la lista y la posición buscada.
+// Post C.: Devuelve un puntero al nodo en la posicón buscada o NULL en caso de error.
 nodo_t* buscar_nodo(lista_t* lista, size_t posicion){
 	if((lista_vacia(lista)) || (posicion >= lista->cantidad)){
 		return NULL;
@@ -169,9 +169,9 @@ int lista_borrar(lista_t* lista){
 	return EXITO;
 }
 
-// Pre C.: Recibe la lista y un puntero a un puntero a un nodo auxiliar.
-// Post C.: Elimina el primer
-void lista_borrar_primero(lista_t* lista, nodo_t* nodo_aux){
+// Pre C.: Recibe un puntero a la lista y un puntero a un nodo auxiliar.
+// Post C.: Elimina el nodo inidial de la lista.
+void lista_borrar_nodo_inicial(lista_t* lista, nodo_t* nodo_aux){
 	nodo_aux = lista->nodo_inicio->siguiente;
 	free(lista->nodo_inicio);
 	lista->nodo_inicio = nodo_aux;
@@ -195,9 +195,9 @@ int lista_borrar_de_posicion(lista_t* lista, size_t posicion){
 		lista_borrar(lista);
 		return EXITO;
 	}
-//															DIBUJAR BORRANDO PRIMERO/ANTE ULTIMO/ULTIMO Y CON 1, 2, 3 Y 4 NODOS
+
 	if(posicion == 0){
-		lista_borrar_primero(lista, nodo_aux);
+		lista_borrar_nodo_inicial(lista, nodo_aux);
 	}
 	else{
 		nodo_aux = buscar_nodo(lista, posicion-1);
