@@ -172,6 +172,10 @@ int lista_borrar(lista_t* lista){
 // Pre C.: Recibe un puntero a la lista y un puntero a un nodo auxiliar.
 // Post C.: Elimina el nodo inidial de la lista.
 void lista_borrar_nodo_inicial(lista_t* lista, nodo_t* nodo_aux){
+	if(lista_vacia(lista)){
+		return;
+	}
+	
 	nodo_aux = lista->nodo_inicio->siguiente;
 	free(lista->nodo_inicio);
 	lista->nodo_inicio = nodo_aux;
