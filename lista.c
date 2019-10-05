@@ -57,22 +57,23 @@ bool lista_vacia(lista_t* lista){
 }
 
 // Pre C.: Recibe un puntero a un nodo y la posición buscada.
-// Post C.: Devuelve '0' si pudo hallar el nodo en la posicón buscada o '-1' si la lista está vacía o si la posición es inválida.
-//			En caso de éxtio, el nodo recibido apuntará al nodo de la posición buscada.
-int buscar_nodo(lista_t* lista, nodo_t** nodo_buscado, size_t posicion){
+// Post C.: Devuelve un puntero al nodo en la posicón buscada o NULL en caso de error
+nodo_t* buscar_nodo(lista_t* lista, size_t posicion){
 	if((lista_vacia(lista)) || (posicion >= lista->cantidad)){
-		return ERROR;
+		return NULL;
 	}
 
 	size_t contador_posicion_buscada = 0;
-	(*nodo_buscado) = lista->nodo_inicio;
+	nodo_t* nodo_buscado = lista->nodo_inicio;
 
 	while(contador_posicion_buscada < posicion){
-		(*nodo_buscado) = (*nodo_buscado)->siguiente;
+		if(nodo_buscado != NULL){
+			nodo_buscado = nodo_buscado->siguiente;
+		}
 		contador_posicion_buscada++;
 	}
 
-	return EXITO;
+	return nodo_buscado;
 }
 
 /*
@@ -80,7 +81,7 @@ int buscar_nodo(lista_t* lista, nodo_t** nodo_buscado, size_t posicion){
  * Devuelve 0 si pudo insertar o -1 si no pudo.
  */
 int lista_insertar(lista_t* lista, void* elemento){
-	if(lista_vacia(lista)){
+	if(hay_error_lista(lista)){
 		return ERROR;
 	}
 
@@ -131,8 +132,7 @@ int lista_insertar_en_posicion(lista_t* lista, void* elemento, size_t posicion){
 		lista->nodo_inicio = nodo;
 	}
 	else{
-		nodo_t* nodo_aux = NULL;
-		buscar_nodo(lista, &nodo_aux, posicion-1);
+		nodo_t* nodo_aux = buscar_nodo(lista, posicion-1);
 		nodo->siguiente = nodo_aux->siguiente;
 		nodo_aux->siguiente = nodo;
 	}
@@ -152,14 +152,29 @@ int lista_borrar(lista_t* lista){
 		return ERROR;
 	}
 
-	nodo_t* nodo_aux = NULL;
-	buscar_nodo(lista, &nodo_aux, (lista->cantidad)-2);
-	free(lista->nodo_fin);
-	lista->nodo_fin = nodo_aux;
-	lista->nodo_fin->siguiente = NULL;
+	if((lista->cantidad) == 1){
+		free(lista->nodo_fin);
+		lista->nodo_inicio = NULL;
+		lista->nodo_fin = NULL;
+	}
+	else{
+		nodo_t* nodo_aux = buscar_nodo(lista, (lista->cantidad)-2);
+		free(lista->nodo_fin);
+		lista->nodo_fin = nodo_aux;
+		lista->nodo_fin->siguiente = NULL;
+	}
+
 	(lista->cantidad)--;
 
 	return EXITO;
+}
+
+// Pre C.: Recibe la lista y un puntero a un puntero a un nodo auxiliar.
+// Post C.: Elimina el primer
+void lista_borrar_primero(lista_t* lista, nodo_t* nodo_aux){
+	nodo_aux = lista->nodo_inicio->siguiente;
+	free(lista->nodo_inicio);
+	lista->nodo_inicio = nodo_aux;
 }
 
 /*
@@ -174,20 +189,25 @@ int lista_borrar_de_posicion(lista_t* lista, size_t posicion){
 		return ERROR;
 	}
 
+	nodo_t* nodo_aux = NULL;
+
 	if(posicion >= lista->cantidad){
 		lista_borrar(lista);
 		return EXITO;
 	}
 //															DIBUJAR BORRANDO PRIMERO/ANTE ULTIMO/ULTIMO Y CON 1, 2, 3 Y 4 NODOS
-	nodo_t* nodo_aux = NULL;
-	nodo_t* nodo_aux_2 = NULL;
+	if(posicion == 0){
+		lista_borrar_primero(lista, nodo_aux);
+	}
+	else{
+		nodo_aux = buscar_nodo(lista, posicion-1);
+		nodo_t* nodo_aux_2 = nodo_aux->siguiente->siguiente;
+		free(nodo_aux->siguiente);
+		nodo_aux->siguiente = nodo_aux_2;
+	}
 
-	buscar_nodo(lista, &nodo_aux, posicion-1);
-	nodo_aux_2 = nodo_aux->siguiente->siguiente;
-	free(nodo_aux->siguiente);
-	nodo_aux->siguiente = nodo_aux_2;
 	(lista->cantidad)--;
-	
+
 	return EXITO;
 }
 
@@ -198,12 +218,10 @@ int lista_borrar_de_posicion(lista_t* lista, size_t posicion){
  * Si no existe dicha posicion devuelve NULL.
  */
 void* lista_elemento_en_posicion(lista_t* lista, size_t posicion){
-	if((hay_error_lista(lista)) || (posicion >= lista->cantidad)){
+	if((lista_vacia(lista)) || (posicion >= lista->cantidad)){
 		return NULL;
 	}
-
-	nodo_t* nodo = NULL;
-	buscar_nodo(lista, &nodo, posicion);
+	nodo_t* nodo = buscar_nodo(lista, posicion);
 
 	return (nodo->elemento);
 }
@@ -234,7 +252,7 @@ size_t lista_elementos(lista_t* lista){
  * Libera la memoria reservada por la lista.
  */
 void lista_destruir(lista_t* lista){
-	while(lista->cantidad > 0){
+	while(!lista_vacia(lista)){
 		lista_borrar(lista);
 	}
 	free(lista);
@@ -279,9 +297,14 @@ lista_iterador_t* lista_iterador_crear(lista_t* lista){
  * si no hay mas.
  */
 bool lista_iterador_tiene_siguiente(lista_iterador_t* iterador){
-	if(lista_iterador_es_nula(iterador)){
+	if((lista_iterador_es_nula(iterador)) || (lista_vacia(iterador->lista))){
 		return false;
 	}
+
+	if(((iterador->corriente) == NULL) && (!lista_vacia(iterador->lista))){
+		return true;
+	}
+
 	return ((iterador->corriente->siguiente) != NULL);
 }
 
