@@ -4,24 +4,20 @@
 
 #define LISTA_VACIA 0
 
-// Funciones para teseo del itreador interno:
+// Función para el testeo del itreador interno:
+
+// Pre C.: Recibe un puntero a un elemento.
+// Post C.: Muestra el elemento por pantalla.
 void mostrar_elemento(void* elemento){
     if(elemento){
-      printf("%c", *(char*)elemento);
+      printf("%c ", *(char*)elemento);
     }
 }
 
-/*
-void funcion_1(){
+// Pruebas (testing) para la lista:
 
-}
-
-void funcion_2(){
-    
-}
-*/
-
-// Pruebas (testing):
+// Pre C.: ---
+// Post C.: Ejecuta las pruebas provistas por la cátedra.
 void ejecutar_caso_feliz(){
     lista_t* lista = lista_crear();
   
@@ -52,11 +48,13 @@ void ejecutar_caso_feliz(){
 
     printf("Imprimo la lista usando el iterador interno: ");
     lista_con_cada_elemento(lista, mostrar_elemento);
-    printf("\n");
+    printf("\n\n");
   
     lista_destruir(lista);
 }
 
+// Pre C.: ---
+// Post C.: Inserta un elemento y luego verifica si la lista no quedó vacía, imprimiendo el resultado de la prueba por pantalla.
 void luego_de_insertar_elemento_la_lista_no_esta_vacia(){
     lista_t* lista = lista_crear();
 
@@ -71,6 +69,9 @@ void luego_de_insertar_elemento_la_lista_no_esta_vacia(){
     lista_destruir(lista);
 }
 
+// Pre C.: ---
+// Post C.: Luego de insertar 3 elementos, intenta insertar otro en una posición inválida (superior al tamaño), y verfica
+//          si este se insertó al final de la lista, imprimiendo el resultado de la prueba por pantalla.
 void si_inserto_un_elemento_en_una_posicion_invalida_deberia_insertarse_al_final(){
     lista_t* lista = lista_crear();
     
@@ -88,11 +89,12 @@ void si_inserto_un_elemento_en_una_posicion_invalida_deberia_insertarse_al_final
           (lista_ultimo(lista) == (void*)&elemento_final)?"EXITO":"FALLO",
           (lista_ultimo(lista) == (void*)&elemento_final)?"se inserta":"no se inserta");
 
-    //printf("\n\t"); lista_con_cada_elemento(lista, mostrar_elemento); printf("\n");
-
     lista_destruir(lista);
 }
 
+// Pre C.: ---
+// Post C.: Intenta borrar un elemento en una posición inválida (superior al tamaño), y luego verifica si se borró el último de la lista,
+//          imprimiendo el resultado de la prueba por pantalla.
 void si_borro_un_elemento_de_una_posicion_invalida_deberia_borrarse_el_ultimo_de_la_lista(){
     lista_t* lista = lista_crear();
     
@@ -115,6 +117,9 @@ void si_borro_un_elemento_de_una_posicion_invalida_deberia_borrarse_el_ultimo_de
     lista_destruir(lista);
 }
 
+// Pre C.: ---
+// Post C.: Intenta buscar un elemento en una posición invalida (superior al tamaño) y verifica si la funcion utilzada devuelve NULL,
+//          imprimiendo el resultado de la prueba por pantalla..
 void si_pido_un_elemento_de_una_posicion_invalida_deberia_devolver_NULL(){
     lista_t* lista = lista_crear();
 
@@ -133,6 +138,8 @@ void si_pido_un_elemento_de_una_posicion_invalida_deberia_devolver_NULL(){
     lista_destruir(lista);
 }
 
+// Pre C.: ---
+// Post C.: Verifica si el último elemento de una lista vacía es NULL, imprimiendo el resultado de la prueba por pantalla.
 void si_la_lista_esta_vacia_entonces_el_ultimo_elemento_deberia_ser_NULL(){
     lista_t* lista = lista_crear();
 
@@ -145,6 +152,8 @@ void si_la_lista_esta_vacia_entonces_el_ultimo_elemento_deberia_ser_NULL(){
     lista_destruir(lista);
 }
 
+// Pre C.: ---
+// Post C.: Verifica si la cantidad de elementos de una lista vacía es '0', imprimiendo el resultado de la prueba por pantalla.
 void si_la_lista_esta_vacia_entonces_la_cantidad_de_elementos_deberia_ser_cero(){
     lista_t* lista = lista_crear();
 
@@ -161,7 +170,7 @@ void si_la_lista_esta_vacia_entonces_la_cantidad_de_elementos_deberia_ser_cero()
 int main(){
     system("clear");
 
-    //ejecutar_caso_feliz();
+    ejecutar_caso_feliz();
 
     luego_de_insertar_elemento_la_lista_no_esta_vacia();
     si_inserto_un_elemento_en_una_posicion_invalida_deberia_insertarse_al_final();
