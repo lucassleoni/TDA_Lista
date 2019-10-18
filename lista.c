@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include "lista.h"
 
 #define ERROR -1
 #define EXITO 0
@@ -12,16 +13,16 @@ typedef struct nodo{
 	struct nodo* siguiente;
 } nodo_t;
 
-typedef struct lista{
+struct lista{
 	nodo_t* nodo_inicio;
 	nodo_t* nodo_fin;
 	size_t cantidad;
-}lista_t;
+};
 
-typedef struct lista_iterador{
+struct lista_iterador{
 	nodo_t* corriente;
 	lista_t* lista;
-}lista_iterador_t;
+};
 
 
 /*
@@ -262,15 +263,15 @@ void lista_destruir(lista_t* lista){
 	free(lista);
 }
 
-// Pre C.: Recibe la estructura del iterador externo.
-// Post C.: Devuelve 'true' si la lista a la que apunta el iterador es nula y 'false' en caso contrario.
-bool lista_iterador_es_nula(lista_iterador_t* iterador){
-	return (iterador->lista == NULL);
-}
-
 
 /* ------------------------------------------------------------------------------------------------------------------------------------------------ */
 
+
+// Pre C.: Recibe la estructura del iterador externo.
+// Post C.: Devuelve 'true' si la lista a la que apunta el iterador es nula y 'false' en caso contrario.
+bool hay_error_iterador(lista_iterador_t* iterador){
+	return ((iterador == NULL) || (iterador->lista == NULL));
+}
 
 /*
  * Crea un iterador para una lista. El iterador creado es válido desde
@@ -301,7 +302,7 @@ lista_iterador_t* lista_iterador_crear(lista_t* lista){
  * si no hay mas.
  */
 bool lista_iterador_tiene_siguiente(lista_iterador_t* iterador){
-	if((lista_iterador_es_nula(iterador)) || (lista_vacia(iterador->lista))){
+	if((hay_error_iterador(iterador)) || (lista_vacia(iterador->lista))){
 		return false;
 	}
 
@@ -317,7 +318,7 @@ bool lista_iterador_tiene_siguiente(lista_iterador_t* iterador){
  * En caso de error devuelve NULL.
  */
 void* lista_iterador_siguiente(lista_iterador_t* iterador){
-	if(lista_iterador_es_nula(iterador)){
+	if(hay_error_iterador(iterador) || (!lista_iterador_tiene_siguiente(iterador))){
 		return NULL;
 	}
 
@@ -341,7 +342,7 @@ void lista_iterador_destruir(lista_iterador_t* iterador){
 }
 
 /*
- * Iterador interno. Recorre la lista e invoca la funcion con cada
+ * Iterador interno. Recorre la lista e invoca la función con cada
  * elemento de la misma.
  */
 void lista_con_cada_elemento(lista_t* lista, void (*funcion)(void*)){
